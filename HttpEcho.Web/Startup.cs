@@ -18,9 +18,7 @@ namespace HttpEcho.Web {
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IConfiguration config, IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) {
             var logger = loggerFactory.CreateLogger<Startup>();
-            if (env.IsDevelopment()) {
-                app.UseDeveloperExceptionPage();
-            }
+
             app.Run(async context => {
                 var msg = config["MSG"] ?? "Hello!!";
                 var next = config["NEXT"] ?? "";
