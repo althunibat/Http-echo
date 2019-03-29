@@ -1,0 +1,23 @@
+version: "3"
+services:
+  hello:
+    image: althunibat/httpecho:0.1
+    environment:
+      - MSG=Hello
+      - NEXT=http://world/
+    ports:
+      - "80"
+  world:
+    image: althunibat/httpecho:0.1
+    environment:
+      - MSG=World
+      - NEXT=http://last/
+    ports:
+      - "80"
+  last:
+    image: althunibat/httpecho:0.1
+    environment:
+      - MSG=!!
+    ports:
+      - "80"
+
