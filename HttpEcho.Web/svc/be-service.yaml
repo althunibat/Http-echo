@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: be
+  labels:
+    app: be
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    name: http
+  selector:
+    app: be
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: be-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: be
+        version: v1
+    spec:
+      containers:
+      - env:
+        - name: MSG
+          value: BE v1
+        image: althunibat/httpecho:0.2
+        imagePullPolicy: IfNotPresent
+        name: be
+        ports:
+        - containerPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: be-v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: be
+        version: v2
+    spec:
+      containers:
+      - env:
+        - name: MSG
+          value: BE v2
+        image: althunibat/httpecho:0.2
+        imagePullPolicy: IfNotPresent
+        name: be
+        ports:
+        - containerPort: 80
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: be
+spec:
+  host: be
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: be
+spec:
+  hosts:
+  - "be"
+  http:
+    - route:
+      - destination:
+          host: be
+          subset: v1
+        weight: 50
+      - destination:
+          host: be
+          subset: v2
+        weight: 50        
