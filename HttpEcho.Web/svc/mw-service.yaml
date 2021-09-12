@@ -42,7 +42,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mw-v1
+  name: mw-v2
 spec:
   selector:
     matchLabels:

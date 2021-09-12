@@ -42,7 +42,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: be-v1
+  name: be-v2
 spec:
   selector:
     matchLabels:
