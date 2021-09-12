@@ -12,11 +12,15 @@ spec:
   selector:
     app: mw
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mw-v1
 spec:
+  selector:
+    matchLabels:
+      app: mw
+      version: v1
   replicas: 1
   template:
     metadata:
@@ -28,20 +32,22 @@ spec:
       - env:
         - name: MSG
           value: MW v1
-        - name: NEXT
-          value: http://be/
-        image: althunibat/httpecho:0.2
+        image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: mw
         ports:
         - containerPort: 80
+        resources: {}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mw-v2
+  name: mw-v1
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      app: mw
+      version: v2
   template:
     metadata:
       labels:
@@ -52,14 +58,15 @@ spec:
       - env:
         - name: MSG
           value: MW v2
-        - name: NEXT
-          value: http://be/
-        image: althunibat/httpecho:0.2
+        image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: mw
         ports:
         - containerPort: 80
+        resources: {}
+          
 ---
+
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -80,7 +87,7 @@ metadata:
   name: mw
 spec:
   hosts:
-  - mw
+  - "mw"
   http:
     - route:
       - destination:

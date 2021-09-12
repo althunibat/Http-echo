@@ -12,11 +12,15 @@ spec:
   selector:
     app: fe
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fe-v1
 spec:
+  selector:
+    matchLabels:
+      app: fe
+      version: v1
   replicas: 1
   template:
     metadata:
@@ -28,20 +32,22 @@ spec:
       - env:
         - name: MSG
           value: FE v1
-        - name: NEXT
-          value: http://mw/
-        image: althunibat/httpecho:0.2
+        image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: fe
         ports:
         - containerPort: 80
+        resources: {}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fe-v2
+  name: fe-v1
 spec:
-  replicas: 1
+  selector:
+    matchLabels:
+      app: fe
+      version: v2
   template:
     metadata:
       labels:
@@ -52,29 +58,15 @@ spec:
       - env:
         - name: MSG
           value: FE v2
-        - name: NEXT
-          value: http://mw/
-        image: althunibat/httpecho:0.2
+        image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: fe
         ports:
         - containerPort: 80
+        resources: {}
+          
 ---
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: fe-gateway
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
----
+
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -95,9 +87,7 @@ metadata:
   name: fe
 spec:
   hosts:
-  - "*"
-  gateways:
-  - fe-gateway
+  - "fe"
   http:
     - route:
       - destination:

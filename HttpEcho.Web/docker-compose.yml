@@ -1,21 +1,21 @@
 version: "3"
 services:
   hello:
-    image: althunibat/httpecho:0.1
+    image: quay.io/hamza.althunibat/http-echo:latest
     environment:
       - MSG=Hello
       - NEXT=http://world/
     ports:
       - "80"
   world:
-    image: althunibat/httpecho:0.1
+    image: quay.io/hamza.althunibat/http-echo:latest
     environment:
       - MSG=World
       - NEXT=http://last/
     ports:
       - "80"
   last:
-    image: althunibat/httpecho:0.1
+    image: quay.io/hamza.althunibat/http-echo:latest
     environment:
       - MSG=!!
     ports:
