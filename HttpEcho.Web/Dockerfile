@@ -1,17 +1,14 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2-alpine AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /app
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
-RUN dotnet restore
-
-# Copy everything else and build
+# Copy and restore as distinct layers
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet restore -r linux-musl-x64 
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-alpine
+RUN dotnet publish -c release -o /app -r linux-musl-x64 --self-contained false --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 WORKDIR /app
-COPY --from=build-env /app/out .
-EXPOSE 80
-ENTRYPOINT ["dotnet", "HttpEcho.Web.dll"]
+COPY --from=build /app ./
+
+ENTRYPOINT ["./HttpEcho.Web"]

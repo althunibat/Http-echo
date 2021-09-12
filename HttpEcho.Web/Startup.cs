@@ -13,24 +13,28 @@ namespace HttpEcho.Web {
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services) {
             services.AddHttpClient();
+            services.AddRouting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IConfiguration config, IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration config,
+            IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) {
             var logger = loggerFactory.CreateLogger<Startup>();
+            app.UseRouting();
+            app.UseEndpoints(ep => {
+                ep.MapGet("/", async ctx => {
+                    var msg = config["MSG"] ?? "Hello!!";
+                    var next = config["NEXT"] ?? "";
+                    if (!string.IsNullOrWhiteSpace(next)) {
+                        var client = clientFactory.CreateClient("next");
+                        var response = await client.GetStringAsync(next);
+                        msg = string.Concat(msg, " ", response);
+                    }
 
-            app.Run(async context => {
-                var msg = config["MSG"] ?? "Hello!!";
-                var next = config["NEXT"] ?? "";
-                if (!string.IsNullOrWhiteSpace(next)) {
-                    var client = clientFactory.CreateClient("next");
-                    var response = await client.GetStringAsync(next);
-                    msg = string.Concat(msg, " ", response);
-                }
-                logger.LogInformation($"Message:- {msg}");
-                await context.Response.WriteAsync(msg);
+                    logger.LogInformation($"Message:- {msg}");
+                    await ctx.Response.WriteAsync(msg);
+                });
             });
-
         }
     }
 }
