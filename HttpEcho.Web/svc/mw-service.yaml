@@ -32,6 +32,8 @@ spec:
       - env:
         - name: MSG
           value: MW v1
+        - name: NEXT
+          value: http://be/
         image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: mw
@@ -58,6 +60,8 @@ spec:
       - env:
         - name: MSG
           value: MW v2
+        - name: NEXT
+          value: http://be/
         image: quay.io/hamza.althunibat/http-echo:latest
         imagePullPolicy: IfNotPresent
         name: mw
@@ -67,7 +71,7 @@ spec:
           
 ---
 
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: mw
@@ -81,7 +85,7 @@ spec:
     labels:
       version: v2
 ---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: mw

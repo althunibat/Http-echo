@@ -7,8 +7,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    name: http
+    - port: 80
+      name: http
   selector:
     app: fe
 ---
@@ -29,15 +29,17 @@ spec:
         version: v1
     spec:
       containers:
-      - env:
-        - name: MSG
-          value: FE v1
-        image: quay.io/hamza.althunibat/http-echo:latest
-        imagePullPolicy: IfNotPresent
-        name: fe
-        ports:
-        - containerPort: 80
-        resources: {}
+        - env:
+            - name: MSG
+              value: FE v1
+            - name: NEXT
+              value: http://mw/
+          image: quay.io/hamza.althunibat/http-echo:latest
+          imagePullPolicy: IfNotPresent
+          name: fe
+          ports:
+            - containerPort: 80
+          resources: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -55,46 +57,64 @@ spec:
         version: v2
     spec:
       containers:
-      - env:
-        - name: MSG
-          value: FE v2
-        image: quay.io/hamza.althunibat/http-echo:latest
-        imagePullPolicy: IfNotPresent
-        name: fe
-        ports:
-        - containerPort: 80
-        resources: {}
-          
----
+        - env:
+            - name: MSG
+              value: FE v2
+            - name: NEXT
+              value: http://mw/
+          image: quay.io/hamza.althunibat/http-echo:latest
+          imagePullPolicy: IfNotPresent
+          name: fe
+          ports:
+            - containerPort: 80
+          resources: {}
 
-apiVersion: networking.istio.io/v1alpha3
+---
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: fe
 spec:
   host: fe
   subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
 ---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: fe-gw
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "fe.althunibat.xyz"
+---
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: fe
 spec:
   hosts:
-  - "fe"
+    - "fe.althunibat.xyz"
+  gateways:
+    - "fe-gw"
   http:
     - route:
-      - destination:
-          host: fe
-          subset: v1
-        weight: 50
-      - destination:
-          host: fe
-          subset: v2
-        weight: 50        
+        - destination:
+            host: fe
+            subset: v1
+          weight: 50
+        - destination:
+            host: fe
+            subset: v2
+          weight: 50
