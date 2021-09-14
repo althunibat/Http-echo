@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore;
+﻿using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -14,8 +16,11 @@ namespace HttpEcho.Web
         public static IHostBuilder CreateWebHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+                    webBuilder
+                        .UseStartup<Startup>()
+                        .ConfigureKestrel(options =>
+                            options.Listen(IPAddress.Any, 80,
+                                cfg => cfg.UseHttps(
+                                    X509Certificate2.CreateFromPemFile("/cert/tls.crt", "/cert/tls.key")))));
     }
 }

@@ -21,6 +21,8 @@ namespace HttpEcho.Web {
             IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) {
             var logger = loggerFactory.CreateLogger<Startup>();
             app.UseRouting();
+            app.UseHsts();
+            app.UseHttpsRedirection();
             app.UseEndpoints(ep => {
                 ep.MapGet("/", async ctx => {
                     var msg = config["MSG"] ?? "Hello!!";

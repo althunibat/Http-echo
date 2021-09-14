@@ -10,5 +10,5 @@ RUN dotnet publish -c release -o /app -r linux-musl-x64 --self-contained false -
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 WORKDIR /app
 COPY --from=build /app ./
-
+VOLUME ["/cert"]
 ENTRYPOINT ["./HttpEcho.Web"]
