@@ -17,10 +17,6 @@ namespace HttpEcho.Web
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                     webBuilder
-                        .UseStartup<Startup>()
-                        .ConfigureKestrel(options =>
-                            options.Listen(IPAddress.Any, 80,
-                                cfg => cfg.UseHttps(
-                                    X509Certificate2.CreateFromPemFile("/cert/tls.crt", "/cert/tls.key")))));
+                        .UseStartup<Startup>());
     }
 }
