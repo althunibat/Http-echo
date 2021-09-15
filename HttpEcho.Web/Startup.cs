@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +28,10 @@ namespace HttpEcho.Web {
                     var next = config["NEXT"] ?? "";
                     if (!string.IsNullOrWhiteSpace(next)) {
                         var client = clientFactory.CreateClient("next");
+                        var headers = ctx.Request.Headers.Where(h=>h.Key.StartsWith("x-"));
+                        foreach (var header in headers) {
+                            client.DefaultRequestHeaders.Add(header.Key, header.Value.ToArray());
+                        }
                         var response = await client.GetStringAsync(next);
                         msg = string.Concat(msg, " ", response);
                     }
